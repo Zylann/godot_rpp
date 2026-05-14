@@ -219,10 +219,14 @@ func _parse_record_cfg() -> bool:
 	# TODO I don't know what this is
 	
 	while _tokenizer.read(token):
-		if token.type == RPP_Token.Type.CLOSE_BLOCK:
-			break
-		else:
-			_make_error("Unhandled content")
+		match token.type:
+			RPP_Token.Type.CLOSE_BLOCK:
+				break
+			RPP_Token.Type.STRING:
+				# Binary?
+				continue
+			_:
+				_make_unexpected_token_error(token)
 	
 	return true
 
