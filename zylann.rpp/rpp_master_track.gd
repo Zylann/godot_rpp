@@ -1,0 +1,1 @@
+class_name RPP_MasterTrack extends RPP_Track
