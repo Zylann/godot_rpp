@@ -36,13 +36,13 @@ func _parse_block() -> bool:
 		"APPLYFX_CFG": if not _parse_applyfx_cfg(): return false
 		"RENDER_CFG": if not _parse_render_cfg(): return false
 		"METRONOME": if not _parse_metronome(): return false
-		"MASTERFXLIST": if not _parse_masterfxlist(): return false
+		"MASTERFXLIST": if not _parse_fxchain(true): return false
 		"VST": if not _parse_vst(): return false
 		"MASTERPLAYSPEEDENV": if not _parse_masterplayspeedenv(): return false
 		"TEMPOENVEX": if not _parse_tempoenvex(): return false
 		"PROJBAY": if not _parse_projbay(): return false
 		"TRACK": if not _parse_track(): return false
-		"FXCHAIN": if not _parse_fxchain(): return false
+		"FXCHAIN": if not _parse_fxchain(false): return false
 		"ITEM": if not _parse_item(): return false
 		"SOURCE": if not _parse_source(null): return false
 		"PARMENV": if not _parse_parmenv(): return false
@@ -307,35 +307,6 @@ func _parse_metronome() -> bool:
 	return true
 
 
-func _parse_masterfxlist() -> bool:
-	var token := RPP_Token.new()
-	
-	while _tokenizer.read(token):
-		if token.type == RPP_Token.Type.CLOSE_BLOCK:
-			break
-		elif token.type == RPP_Token.Type.STRING:
-			match token.value:
-				"SHOW": if not _skip_numbers(1): return false
-				"LASTSEL": if not _skip_numbers(1): return false
-				"DOCKED": if not _skip_numbers(1): return false
-				"BYPASS": if not _skip_numbers(3): return false
-				"PRESETNAME": if not _skip_strings(1): return false
-				"FLOATPOS": if not _skip_numbers(4): return false
-				"FXID": if not _skip_guid(): return false
-				"WAK": if not _skip_numbers(2): return false
-				_:
-					_make_unknown_key_error(token.value)
-					return false
-		elif token.type == RPP_Token.Type.OPEN_BLOCK:
-			# Likely VST
-			if not _parse_block():
-				return false
-		else:
-			_make_error("Unhandled content")
-	
-	return true
-
-
 func _parse_vst() -> bool:
 	var token := RPP_Token.new()
 	
@@ -522,7 +493,7 @@ func _parse_track() -> bool:
 	return true
 
 
-func _parse_fxchain() -> bool:
+func _parse_fxchain(_unused_is_master: bool) -> bool:
 	var token := RPP_Token.new()
 	
 	while _tokenizer.read(token):
