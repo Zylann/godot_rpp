@@ -1,0 +1,1 @@
+class_name RPP_JesusonicFx extends RPP_Fx

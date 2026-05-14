@@ -38,6 +38,7 @@ func _parse_block() -> bool:
 		"METRONOME": if not _parse_metronome(): return false
 		"MASTERFXLIST": if not _parse_fxchain(true): return false
 		"VST": if not _parse_vst(): return false
+		"JS": if not _parse_js(): return false
 		"MASTERPLAYSPEEDENV": if not _parse_masterplayspeedenv(): return false
 		"TEMPOENVEX": if not _parse_tempoenvex(): return false
 		"PROJBAY": if not _parse_projbay(): return false
@@ -344,6 +345,29 @@ func _parse_vst() -> bool:
 	
 	var track := _get_last_track()
 	track.fx_list.append(vst)
+	
+	return true
+
+
+func _parse_js() -> bool:
+	var token := RPP_Token.new()
+	
+	var js := RPP_JesusonicFx.new()
+	
+	if not _expect_string(token): return false
+	js.name = token.value
+
+	var track := _get_last_track()
+	track.fx_list.append(js)
+	
+	if not _skip_strings(1): return false
+	
+	# Line where the block opened
+	if not _skip_to_end_of_line(): return false
+	# Line with a bunch of config I don't understand
+	if not _skip_to_end_of_line(): return false
+	
+	if not _skip_type_n(RPP_Token.Type.CLOSE_BLOCK, 1): return false
 	
 	return true
 
