@@ -33,7 +33,7 @@ func _parse_block() -> bool:
 	match token.value:
 		"REAPER_PROJECT": if not _parse_reaper_project(): return false
 		"RECORD_CFG": if not _parse_record_cfg(): return false
-		"APPLYFX_CFG": if not _parse_record_cfg(): return false
+		"APPLYFX_CFG": if not _parse_applyfx_cfg(): return false
 		"RENDER_CFG": if not _parse_render_cfg(): return false
 		"METRONOME": if not _parse_metronome(): return false
 		"MASTERFXLIST": if not _parse_masterfxlist(): return false
