@@ -535,8 +535,6 @@ func _parse_track() -> bool:
 				"MIDIOUT": if not _skip_numbers(1): return false
 				"MAINSEND": if not _skip_numbers(2): return false
 				
-				# TODO
-				
 				_:
 					_make_unknown_key_error(token.value)
 					return false
