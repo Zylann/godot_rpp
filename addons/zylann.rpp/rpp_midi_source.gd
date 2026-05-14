@@ -1,5 +1,7 @@
 class_name RPP_MidiSource extends RPP_ItemSource
 
+# https://wiki.cockos.com/wiki/index.php/StateChunkAndRppMidiFormat
+
 enum MessageType {
 	NOTE_ON = 0x9,
 	NOTE_OFF = 0x8,
