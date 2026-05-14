@@ -989,7 +989,7 @@ func _make_error(msg: String) -> void:
 
 
 func _make_unknown_key_error(key: String) -> void:
-	_make_error(str("Unknown key ", key))
+	_make_error(str("Unknown key `", key, "`"))
 
 
 func _make_unexpected_token_error(token: RPP_Token) -> void:
