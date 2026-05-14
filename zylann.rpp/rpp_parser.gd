@@ -59,6 +59,8 @@ func _parse_block() -> bool:
 			var track := _get_last_track()
 			track.post_fx_volume_envelope = env
 		
+		"NOTES": if not _parse_notes(): return false
+		
 		_:
 			_make_error(str("Unknown block name \"", token.value, "\""))
 			return false
@@ -184,6 +186,14 @@ func _parse_reaper_project() -> bool:
 					if not _skip_numbers(1): return false
 					
 					_project.markers.append(marker)
+
+				"TITLE":
+					if not _expect_string(token): return false
+					_project.title = token.value
+
+				"AUTHOR":
+					if not _expect_string(token): return false
+					_project.author = token.value
 
 				_:
 					_make_unknown_key_error(token.value)
@@ -919,6 +929,32 @@ func _parse_midi_message(midi_source: RPP_MidiSource, _unused_selected: bool) ->
 	midi_source.append_message(offset, message_type, channel, data1, data2)
 	
 	_tokenizer.set_numbers_as_strings(false)
+	
+	return true
+
+
+func _parse_notes() -> bool:
+	if not _skip_numbers(2): return false
+	
+	var token := RPP_Token.new()
+	var text := ""
+	
+	while _tokenizer.expect(token):
+		match token.type:
+			RPP_Token.Type.STRING:
+				var line : String = token.value
+				if text.length() > 0:
+					text += "\n"
+				text += line
+			
+			RPP_Token.Type.CLOSE_BLOCK:
+				break
+			
+			_:
+				_make_unexpected_token_error(token)
+				return false
+	
+	_project.notes = text
 	
 	return true
 

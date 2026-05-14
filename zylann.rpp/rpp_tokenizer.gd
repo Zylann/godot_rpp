@@ -147,6 +147,19 @@ func _read(out_token: RPP_Token) -> bool:
 			_pos = end_pos + 1
 			return true
 		
+		if c == "|":
+			# Full-line string regardless of spaces. Used in notes
+			var begin_pos := _pos + 1
+			var end_pos := _source.find("\n", _pos)
+			if end_pos == -1:
+				_make_error("Unexpected end of file")
+				return false
+			var s := _source.substr(begin_pos, end_pos - begin_pos)
+			out_token.type = RPP_Token.Type.STRING
+			out_token.value = s
+			_pos = end_pos
+			return true
+		
 		if (
 			c.is_valid_ascii_identifier() or "/+".contains(c)
 			or (_numbers_as_strings and c.is_valid_int())

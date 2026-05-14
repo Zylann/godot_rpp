@@ -1,5 +1,9 @@
 class_name RPP_Project
 
+var title: String
+var author: String
+var notes: String
+
 var reaper_version: String # "6.12c/x64"
 var ripple: bool = false
 var auto_cross_fade: bool = false
