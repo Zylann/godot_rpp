@@ -21,7 +21,7 @@ func _init(s: String) -> void:
 
 
 func get_line_index() -> int:
-	return _line_index + 1
+	return _line_index
 
 
 func set_newlines(enable: bool) -> void:
