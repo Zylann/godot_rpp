@@ -159,6 +159,8 @@ func _parse_reaper_project() -> bool:
 				"MASTER_VOLUME": if not _skip_numbers(5): return false
 				"MASTER_FX": if not _skip_numbers(1): return false
 				"MASTER_SEL": if not _skip_numbers(1): return false
+				"MASTER_PANMODE": if not _skip_numbers(1): return false
+				"MASTER_PANLAWFLAGS": if not _skip_numbers(1): return false
 				
 				"MARKER":
 					var marker := RPP_Marker.new()
@@ -194,7 +196,10 @@ func _parse_reaper_project() -> bool:
 				"AUTHOR":
 					if not _expect_string(token): return false
 					_project.author = token.value
-
+				
+				"ENVFADESZ10": if not _skip_numbers(1): return false
+				"PANLAWFLAGS": if not _skip_numbers(1): return false
+				
 				_:
 					_make_unknown_key_error(token.value)
 					return false
