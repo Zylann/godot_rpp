@@ -60,7 +60,8 @@ func set_message_type(i: MessageType, v: int) -> void:
 func get_message_type(i: int) -> MessageType:
 	var c := get_message_count()
 	assert(i >= 0 and i < c)
-	return _messages.decode_u8(i * MESSAGE_LENGTH + 4) & 0x0f
+	var mt := (_messages.decode_u8(i * MESSAGE_LENGTH + 4) & 0x0f)
+	return mt as MessageType
 
 
 func set_message_channel(i: int, v: int) -> void:
