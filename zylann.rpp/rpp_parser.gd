@@ -198,7 +198,18 @@ func _parse_reaper_project() -> bool:
 						const selected_bit = 1 << 3
 						marker.selected = (flags & selected_bit) != 0
 						
-						if not _skip_numbers(2): return false
+						if not _expect_number(token): return false
+						var color_code := int(token.value)
+						if color_code == 0:
+							marker.use_custom_color = false
+						else:
+							var r := color_code & 0xff
+							var g := (color_code >> 8) & 0xff
+							var b := (color_code >> 16) & 0xff
+							marker.use_custom_color = true
+							marker.color = Color(r / 255.0, g / 255.0, b / 255.0)
+						
+						if not _skip_numbers(1): return false
 						if not _skip_strings(1): return false
 						
 						if not _expect_guid(token): return false

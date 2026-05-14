@@ -5,6 +5,8 @@ var time := 0.0
 var name := ""
 var guid := ""
 var selected := false
+var color := Color()
+var use_custom_color := false
 
 
 func to_region(end_time: float) -> RPP_Region:
@@ -14,6 +16,8 @@ func to_region(end_time: float) -> RPP_Region:
 	r.name = name
 	r.guid = guid
 	r.selected = selected
+	r.color = color
+	r.use_custom_color = use_custom_color
 	assert(end_time >= time)
 	r.end_time = end_time
 	return r
