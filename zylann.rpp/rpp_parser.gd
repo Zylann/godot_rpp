@@ -164,31 +164,49 @@ func _parse_reaper_project() -> bool:
 				"MASTER_PANLAWFLAGS": if not _skip_numbers(1): return false
 				
 				"MARKER":
-					var marker := RPP_Marker.new()
-					
 					if not _expect_number(token): return false
-					marker.number = token.value
+					var marker_number : int = token.value
 					
-					if not _expect_number(token): return false
-					marker.time = token.value
-					
-					if not _expect_string_or_number(token): return false
-					marker.name = str(token.value)
-					
-					if not _expect_number(token): return false
-					var flags := int(token.value)
-					const selected_bit = 1 << 3
-					marker.selected = (flags & selected_bit) != 0
-					
-					if not _skip_numbers(2): return false
-					if not _skip_strings(1): return false
-					
-					if not _expect_guid(token): return false
-					marker.guid = token.value
+					var existing_marker_index := _project.get_marker_index_by_number(marker_number)
+					if existing_marker_index != -1:
+						# Regions are defined by 2 consecutive MARKER tags with the same number
+						
+						if not _expect_number(token): return false
+						var end_time = token.value
+						
+						if not _skip_strings(1): return false
+						if not _skip_numbers(1): return false
+						
+						var marker := _project.markers[existing_marker_index]
+						var region := marker.to_region(end_time)
+						
+						_project.markers.remove_at(existing_marker_index)
+						_project.regions.append(region)
+						
+					else:
+						var marker := RPP_Marker.new()
+						marker.number = marker_number
+						
+						if not _expect_number(token): return false
+						marker.time = token.value
+						
+						if not _expect_string_or_number(token): return false
+						marker.name = str(token.value)
+						
+						if not _expect_number(token): return false
+						var flags := int(token.value)
+						const selected_bit = 1 << 3
+						marker.selected = (flags & selected_bit) != 0
+						
+						if not _skip_numbers(2): return false
+						if not _skip_strings(1): return false
+						
+						if not _expect_guid(token): return false
+						marker.guid = token.value
 
-					if not _skip_numbers(1): return false
-					
-					_project.markers.append(marker)
+						if not _skip_numbers(1): return false
+						
+						_project.markers.append(marker)
 
 				"TITLE":
 					if not _expect_string(token): return false

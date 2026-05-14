@@ -18,6 +18,7 @@ var master_track := RPP_MasterTrack.new()
 var tracks : Array[RPP_Track] = []
 
 var markers: Array[RPP_Marker] = []
+var regions: Array[RPP_Region] = []
 
 
 static func load_from_file(path: String) -> RPP_Project:
@@ -35,6 +36,14 @@ static func load_from_text(source: String) -> RPP_Project:
 	if not parser.parse(project):
 		return null
 	return project
+
+
+func get_marker_index_by_number(n: int) -> int:
+	for i in markers.size():
+		var m := markers[i]
+		if m.number == n:
+			return i
+	return -1
 
 
 func debug_print() -> void:
