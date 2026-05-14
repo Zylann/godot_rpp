@@ -31,3 +31,14 @@ static func load_from_text(source: String) -> RPP_Project:
 	if not parser.parse(project):
 		return null
 	return project
+
+
+func debug_print() -> void:
+	print("Default tempo: ", tempo_speed, " ", tempo_signature_num, "/", tempo_signature_denom)
+	print("Markers: ", markers.size())
+	print("Master:")
+	master_track.debug_print("    ")
+	print("Tracks:")
+	for i in tracks.size():
+		var track := tracks[i]
+		track.debug_print("    ", i + 1)
