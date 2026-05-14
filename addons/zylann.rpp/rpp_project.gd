@@ -46,6 +46,14 @@ func get_marker_index_by_number(n: int) -> int:
 	return -1
 
 
+func get_total_length() -> float:
+	var end_time := 0.0
+	for track in tracks:
+		for item in track.items:
+			end_time = maxf(end_time, item.position + item.length)
+	return end_time
+
+
 func debug_print() -> void:
 	print("Default tempo: ", tempo_speed, " ", tempo_signature_num, "/", tempo_signature_denom)
 	print("Markers: ", markers.size())
