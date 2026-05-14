@@ -534,6 +534,8 @@ func _parse_track() -> bool:
 				"PERF": if not _skip_numbers(1): return false
 				"MIDIOUT": if not _skip_numbers(1): return false
 				"MAINSEND": if not _skip_numbers(2): return false
+				"PANLAWFLAGS": if not _skip_numbers(1): return false
+				"FIXEDLANES": if not _skip_numbers(5): return false
 				
 				_:
 					_make_unknown_key_error(token.value)
@@ -561,6 +563,7 @@ func _parse_fxchain(_unused_is_master: bool) -> bool:
 				"FLOATPOS": if not _skip_numbers(4): return false
 				"FXID": if not _skip_guid(): return false
 				"WAK": if not _skip_numbers(2): return false
+				"WET": if not _skip_numbers(2): return false
 				
 				_:
 					_make_unknown_key_error(token.value)
