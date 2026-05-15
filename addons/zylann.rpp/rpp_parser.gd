@@ -3,15 +3,14 @@ class_name RPP_Parser
 # https://wiki.cockos.com/wiki/index.php/State_Chunk_Definitions
 # Most of the data is skipped, it will be implemented as needed
 
-enum FxChainType {
-	MASTER,
+enum ParsingContext {
+	PROJECT,
 	TRACK,
 	ITEM
 }
 
 var _tokenizer : RPP_Tokenizer
 var _project : RPP_Project
-var _fx_chain_type : FxChainType
 
 
 func _init(source: String) -> void:
@@ -25,13 +24,13 @@ func parse(project: RPP_Project) -> bool:
 	if not _tokenizer.expect_type(token, RPP_Token.Type.OPEN_BLOCK):
 		return false
 	
-	if not _parse_block():
+	if not _parse_block(ParsingContext.PROJECT):
 		return false
 	
 	return true
 
 
-func _parse_block() -> bool:
+func _parse_block(context: ParsingContext) -> bool:
 	var token := RPP_Token.new()
 	
 	if not _tokenizer.expect_type(token, RPP_Token.Type.STRING):
@@ -43,15 +42,15 @@ func _parse_block() -> bool:
 		"APPLYFX_CFG": if not _parse_applyfx_cfg(): return false
 		"RENDER_CFG": if not _parse_render_cfg(): return false
 		"METRONOME": if not _parse_metronome(): return false
-		"MASTERFXLIST": if not _parse_fxchain(FxChainType.MASTER): return false
-		"VST": if not _parse_vst(): return false
-		"JS": if not _parse_js(): return false
+		"MASTERFXLIST": if not _parse_fxchain(context): return false
+		"VST": if not _parse_vst(context): return false
+		"JS": if not _parse_js(context): return false
 		"MASTERPLAYSPEEDENV": if not _parse_masterplayspeedenv(): return false
 		"TEMPOENVEX": if not _parse_tempoenvex(): return false
 		"PROJBAY": if not _parse_projbay(): return false
 		"TRACK": if not _parse_track(): return false
-		"FXCHAIN": if not _parse_fxchain(FxChainType.TRACK): return false
-		"TAKEFX": if not _parse_fxchain(FxChainType.ITEM): return false
+		"FXCHAIN": if not _parse_fxchain(context): return false
+		"TAKEFX": if not _parse_fxchain(context): return false
 		"ITEM": if not _parse_item(): return false
 		"SOURCE": if not _parse_source(null): return false
 		"PARMENV": if not _parse_parmenv(): return false
@@ -68,7 +67,7 @@ func _parse_block() -> bool:
 			var track := _get_last_track()
 			track.post_fx_volume_envelope = env
 		
-		"NOTES": if not _parse_notes(): return false
+		"NOTES": if not _parse_notes(context): return false
 		
 		_:
 			_make_error(str("Unknown block name \"", token.value, "\""))
@@ -243,7 +242,7 @@ func _parse_reaper_project() -> bool:
 					return false
 		
 		elif token.type == RPP_Token.Type.OPEN_BLOCK:
-			if not _parse_block():
+			if not _parse_block(ParsingContext.PROJECT):
 				return false
 		
 		elif token.type == RPP_Token.Type.CLOSE_BLOCK:
@@ -345,7 +344,7 @@ func _parse_metronome() -> bool:
 	return true
 
 
-func _parse_vst() -> bool:
+func _parse_vst(context: ParsingContext) -> bool:
 	var token := RPP_Token.new()
 	
 	var vst := RPP_Vst.new()
@@ -380,12 +379,12 @@ func _parse_vst() -> bool:
 			_make_error(str("Unexpected token ", token.to_debug_string()))
 			return false
 	
-	_append_fx(vst)
+	_append_fx(vst, context)
 	
 	return true
 
 
-func _parse_js() -> bool:
+func _parse_js(context: ParsingContext) -> bool:
 	var token := RPP_Token.new()
 	
 	var js := RPP_JesusonicFx.new()
@@ -393,7 +392,7 @@ func _parse_js() -> bool:
 	if not _expect_string(token): return false
 	js.name = token.value
 	
-	_append_fx(js)
+	_append_fx(js, context)
 	
 	if not _skip_strings(1): return false
 	
@@ -407,20 +406,23 @@ func _parse_js() -> bool:
 	return true
 
 
-func _append_fx(fx: RPP_Fx) -> bool:
-	var track := _get_last_track()
-	match _fx_chain_type:
-		FxChainType.MASTER:
+func _append_fx(fx: RPP_Fx, context: ParsingContext) -> bool:
+	match context:
+		ParsingContext.PROJECT:
+			var track := _get_last_track()
 			track.fx_list.append(fx)
-		FxChainType.TRACK:
+		
+		ParsingContext.TRACK:
+			var track := _get_last_track()
 			track.fx_list.append(fx)
-		FxChainType.ITEM:
-			var last_item_index := track.items.size() - 1
-			if last_item_index < 0:
+		
+		ParsingContext.ITEM:
+			var item := _get_last_item()
+			if item == null:
 				_make_error("Expected item to add FX on")
 				return false
-			var item := track.items[last_item_index]
 			item.fx_list.append(fx)
+
 	return true
 
 
@@ -481,7 +483,7 @@ func _parse_track() -> bool:
 		if token.type == RPP_Token.Type.CLOSE_BLOCK:
 			break
 		elif token.type == RPP_Token.Type.OPEN_BLOCK:
-			if not _parse_block():
+			if not _parse_block(ParsingContext.TRACK):
 				return false
 		elif token.type == RPP_Token.Type.STRING:
 			match token.value:
@@ -577,9 +579,7 @@ func _parse_track() -> bool:
 	return true
 
 
-func _parse_fxchain(chain_type: FxChainType) -> bool:
-	_fx_chain_type = chain_type
-	
+func _parse_fxchain(context: ParsingContext) -> bool:
 	var token := RPP_Token.new()
 	
 	while _tokenizer.read(token):
@@ -606,7 +606,7 @@ func _parse_fxchain(chain_type: FxChainType) -> bool:
 					return false
 		elif token.type == RPP_Token.Type.OPEN_BLOCK:
 			# Likely VST
-			if not _parse_block():
+			if not _parse_block(context):
 				return false
 		else:
 			_make_error("Unhandled content")
@@ -700,6 +700,14 @@ func _get_last_track() -> RPP_Track:
 	return _project.tracks[last_index]
 
 
+func _get_last_item() -> RPP_Item:
+	var track := _get_last_track()
+	var last_index := track.items.size() - 1
+	if last_index < 0:
+		return null
+	return track.items[last_index]
+
+
 func _parse_item() -> bool:
 	var token := RPP_Token.new()
 	
@@ -714,7 +722,7 @@ func _parse_item() -> bool:
 			break
 		elif token.type == RPP_Token.Type.OPEN_BLOCK:
 			# SOURCE
-			if not _parse_block():
+			if not _parse_block(ParsingContext.ITEM):
 				push_error("Failed to parse item")
 				return false
 		elif token.type == RPP_Token.Type.STRING:
@@ -1024,8 +1032,10 @@ func _parse_midi_message(midi_source: RPP_MidiSource, _unused_selected: bool) ->
 	return true
 
 
-func _parse_notes() -> bool:
-	if not _skip_numbers(2): return false
+func _parse_notes(context: ParsingContext) -> bool:
+	# Not sure yet when exactly these numbers come up, that might not be correct
+	if context == ParsingContext.PROJECT:
+		if not _skip_numbers(2): return false
 	
 	var token := RPP_Token.new()
 	var text := ""
@@ -1045,7 +1055,15 @@ func _parse_notes() -> bool:
 				_make_unexpected_token_error(token)
 				return false
 	
-	_project.notes = text
+	match context:
+		ParsingContext.PROJECT:
+			_project.notes = text
+		ParsingContext.ITEM:
+			var item := _get_last_item()
+			if item == null:
+				_make_error("No item to put notes on")
+				return false
+			item.notes = text
 	
 	return true
 

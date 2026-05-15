@@ -13,5 +13,6 @@ var name := ""
 var volume := 0.0
 var pan := 0.0
 var fx_list : Array[RPP_Fx] = []
+var notes := ""
 
 var source : RPP_ItemSource
