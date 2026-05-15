@@ -3,8 +3,15 @@ class_name RPP_Parser
 # https://wiki.cockos.com/wiki/index.php/State_Chunk_Definitions
 # Most of the data is skipped, it will be implemented as needed
 
+enum FxChainType {
+	MASTER,
+	TRACK,
+	ITEM
+}
+
 var _tokenizer : RPP_Tokenizer
 var _project : RPP_Project
+var _fx_chain_type : FxChainType
 
 
 func _init(source: String) -> void:
@@ -36,14 +43,15 @@ func _parse_block() -> bool:
 		"APPLYFX_CFG": if not _parse_applyfx_cfg(): return false
 		"RENDER_CFG": if not _parse_render_cfg(): return false
 		"METRONOME": if not _parse_metronome(): return false
-		"MASTERFXLIST": if not _parse_fxchain(true): return false
+		"MASTERFXLIST": if not _parse_fxchain(FxChainType.MASTER): return false
 		"VST": if not _parse_vst(): return false
 		"JS": if not _parse_js(): return false
 		"MASTERPLAYSPEEDENV": if not _parse_masterplayspeedenv(): return false
 		"TEMPOENVEX": if not _parse_tempoenvex(): return false
 		"PROJBAY": if not _parse_projbay(): return false
 		"TRACK": if not _parse_track(): return false
-		"FXCHAIN": if not _parse_fxchain(false): return false
+		"FXCHAIN": if not _parse_fxchain(FxChainType.TRACK): return false
+		"TAKEFX": if not _parse_fxchain(FxChainType.ITEM): return false
 		"ITEM": if not _parse_item(): return false
 		"SOURCE": if not _parse_source(null): return false
 		"PARMENV": if not _parse_parmenv(): return false
@@ -372,8 +380,7 @@ func _parse_vst() -> bool:
 			_make_error(str("Unexpected token ", token.to_debug_string()))
 			return false
 	
-	var track := _get_last_track()
-	track.fx_list.append(vst)
+	_append_fx(vst)
 	
 	return true
 
@@ -385,9 +392,8 @@ func _parse_js() -> bool:
 	
 	if not _expect_string(token): return false
 	js.name = token.value
-
-	var track := _get_last_track()
-	track.fx_list.append(js)
+	
+	_append_fx(js)
 	
 	if not _skip_strings(1): return false
 	
@@ -398,6 +404,23 @@ func _parse_js() -> bool:
 	
 	if not _skip_type_n(RPP_Token.Type.CLOSE_BLOCK, 1): return false
 	
+	return true
+
+
+func _append_fx(fx: RPP_Fx) -> bool:
+	var track := _get_last_track()
+	match _fx_chain_type:
+		FxChainType.MASTER:
+			track.fx_list.append(fx)
+		FxChainType.TRACK:
+			track.fx_list.append(fx)
+		FxChainType.ITEM:
+			var last_item_index := track.items.size() - 1
+			if last_item_index < 0:
+				_make_error("Expected item to add FX on")
+				return false
+			var item := track.items[last_item_index]
+			item.fx_list.append(fx)
 	return true
 
 
@@ -554,7 +577,9 @@ func _parse_track() -> bool:
 	return true
 
 
-func _parse_fxchain(_unused_is_master: bool) -> bool:
+func _parse_fxchain(chain_type: FxChainType) -> bool:
+	_fx_chain_type = chain_type
+	
 	var token := RPP_Token.new()
 	
 	while _tokenizer.read(token):
