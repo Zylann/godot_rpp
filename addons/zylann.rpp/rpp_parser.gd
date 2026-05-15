@@ -819,8 +819,8 @@ func _parse_source(section: RPP_ItemSourceSection) -> bool:
 		"SECTION":
 			if not _parse_source_section():
 				return false
-			if not _tokenizer.expect_type(token, RPP_Token.Type.CLOSE_BLOCK):
-				return false
+			#if not _tokenizer.expect_type(token, RPP_Token.Type.CLOSE_BLOCK):
+				#return false
 			return true
 		"MIDI":
 			midi_source = RPP_MidiSource.new()
