@@ -162,7 +162,7 @@ func _read(out_token: RPP_Token) -> bool:
 		
 		if (
 			c.is_valid_ascii_identifier() or "/+".contains(c)
-			or (_numbers_as_strings and c.is_valid_int())
+			or (_numbers_as_strings and (c.is_valid_int() or c == "-"))
 		):
 			var end_pos := _find_unquoted_string_end(_pos)
 			assert(end_pos > _pos)
