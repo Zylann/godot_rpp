@@ -589,6 +589,31 @@ func _parse_track() -> bool:
 				"FREEMODE": if not _skip_numbers(1): return false
 				"LAYOUTS": if not _skip_strings(2): return false
 				
+				"AUXRECV":
+					var receive := RPP_Receive.new()
+					if not _expect_number(token): return false
+					receive.source_track_index = token.value
+					
+					if not _skip_numbers(1): return false # Mode
+					
+					if not _expect_number(token): return false
+					receive.volume = token.value
+
+					if not _expect_number(token): return false
+					receive.pan = token.value
+
+					if not _expect_number(token): return false
+					receive.mute = token.value != 0
+
+					if not _expect_number(token): return false
+					receive.mono_sum = token.value != 0
+
+					if not _expect_number(token): return false
+					receive.inverted_phase = token.value != 0
+					
+					if not _skip_to_end_of_line(): return false
+					
+					track.receives.append(receive)
 				
 				_:
 					_make_unknown_key_error(token.value)
@@ -763,6 +788,14 @@ func _get_last_item() -> RPP_Item:
 	if last_index < 0:
 		return null
 	return track.items[last_index]
+
+
+func _get_last_receive() -> RPP_Receive:
+	var track := _get_last_track()
+	var last_index := track.receives.size() - 1
+	if last_index < 0:
+		return null
+	return track.receives[last_index]
 
 
 func _parse_item() -> bool:

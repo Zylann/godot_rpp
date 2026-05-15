@@ -17,6 +17,7 @@ var pre_fx_volume_envelope: RPP_SimpleEnvelope
 var post_fx_volume_envelope: RPP_SimpleEnvelope
 var post_fx_pan_envelope: RPP_SimpleEnvelope
 var parent_send := true
+var receives: Array[RPP_Receive] = []
 
 
 func debug_print(base_indent: String = "", num: int = -1) -> void:

@@ -137,15 +137,21 @@ func _read(out_token: RPP_Token) -> bool:
 			_pos = end_pos + 1
 			return true
 		
-		if c == "\"":
+		if c == "\"" or c == "'":
 			# Quoted string
+			
+			# Note: I saw `''` only in AUXRECV tags so far, and always empty.
+			# Am I right that these are strings with an alternate delimiter?
+			var delimiter := c
+			
 			# TODO Find out if we have to handle escaping.
+			#      What happens if someone names a track with a delimiter?
 			#      Backslashes seem to not be escaped at all in paths, they appear once.
 			var pos := _pos + 1
 			if pos >= _source.length():
 				_make_error("Unexpected end of file")
 				return false
-			var end_pos := _source.find("\"", pos)
+			var end_pos := _source.find(delimiter, pos)
 			out_token.value = _source.substr(pos, end_pos - pos)
 			out_token.type = RPP_Token.Type.STRING
 			_pos = end_pos + 1
