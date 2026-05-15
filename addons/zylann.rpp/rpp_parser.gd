@@ -1075,14 +1075,18 @@ func _skip_strings(count: int) -> bool:
 
 func _skip_to_end_of_line() -> bool:
 	var prev_newlines := _tokenizer.is_newlines_enabled()
+	var prev_stro := _tokenizer.is_numbers_as_strings()
+	
 	_tokenizer.set_newlines(true)
+	_tokenizer.set_numbers_as_strings(true)
+	
 	var token := RPP_Token.new()
 	while _tokenizer.expect(token):
 		match token.type:
 			RPP_Token.Type.STRING:
 				continue
-			RPP_Token.Type.NUMBER:
-				continue
+			#RPP_Token.Type.NUMBER:
+				#continue
 			RPP_Token.Type.GUID:
 				continue
 			RPP_Token.Type.NEWLINE:
@@ -1090,7 +1094,10 @@ func _skip_to_end_of_line() -> bool:
 			_:
 				_make_unexpected_token_error(token)
 				return false
+
 	_tokenizer.set_newlines(prev_newlines)
+	_tokenizer.set_numbers_as_strings(prev_stro)
+
 	return true
 
 

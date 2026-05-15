@@ -36,6 +36,10 @@ func set_numbers_as_strings(enable: bool) -> void:
 	_numbers_as_strings = enable
 
 
+func is_numbers_as_strings() -> bool:
+	return _numbers_as_strings
+
+
 func expect_type(out_token: RPP_Token, type: RPP_Token.Type) -> bool:
 	var ok := expect(out_token)
 	if out_token.type != type:
