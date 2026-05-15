@@ -78,6 +78,24 @@ func _parse_block(context: ParsingContext) -> bool:
 			_project.pooled_envelopes.append(envelope)
 			return _parse_envelope(envelope)
 		
+		"AUXMUTEENV":
+			var env := RPP_SimpleEnvelope.new()
+			if not _parse_envelope(env): return false
+			var receive := _get_last_receive()
+			if receive == null:
+				_make_error("No receive found to put mute envelope on")
+				return false
+			receive.mute_envelope = env
+		
+		"AUXVOLENV":
+			var env := RPP_SimpleEnvelope.new()
+			if not _parse_envelope(env): return false
+			var receive := _get_last_receive()
+			if receive == null:
+				_make_error("No receive found to put volume envelope on")
+				return false
+			receive.volume_envelope = env
+		
 		"NOTES": if not _parse_notes(context): return false
 		
 		_:
