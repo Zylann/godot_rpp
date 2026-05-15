@@ -666,20 +666,26 @@ func _parse_parmenv() -> bool:
 	
 	# Seen the following sequences come up on different files:
 	# <PARMENV number number number number
+	# <PARMENV number number number number string
 	# <PARMENV string number number number string
 	
-	if not _expect_string_or_number(token): return false
-	if token.type == RPP_Token.Type.STRING:
-		envelope.parameter_name = token.value
-		
-		if not _skip_numbers(3): return false
-		
-		if not _expect_string(token): return false
-		envelope.parameter_name2 = token.value
+	_tokenizer.set_newlines(true)
 	
-	elif token.type == RPP_Token.Type.NUMBER:
-		envelope.parameter_name = str(token.value)
-		if not _skip_numbers(3): return false
+	if not _expect_string_or_number(token): return false
+	envelope.parameter_name = str(token.value)
+	
+	if not _skip_numbers(3): return false
+	
+	if not _tokenizer.expect(token): return false
+	if token.type != RPP_Token.Type.NEWLINE:
+		if token.type != RPP_Token.Type.STRING:
+			_make_unexpected_token_error(token)
+			return false
+		envelope.parameter_name2 = token.value
+		
+		if not _skip_type_n(RPP_Token.Type.NEWLINE, 1): return false
+	
+	_tokenizer.set_newlines(false)
 	
 	if not _parse_envelope(envelope): return false
 	
