@@ -543,6 +543,7 @@ func _parse_track() -> bool:
 				"MAINSEND": if not _skip_numbers(2): return false
 				"PANLAWFLAGS": if not _skip_numbers(1): return false
 				"FIXEDLANES": if not _skip_numbers(5): return false
+				"FREEMODE": if not _skip_numbers(1): return false
 				
 				_:
 					_make_unknown_key_error(token.value)
