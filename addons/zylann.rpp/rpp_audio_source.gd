@@ -4,6 +4,7 @@ enum Type {
 	VORBIS,
 	FLAC,
 	WAVE,
+	MP3,
 	OTHER
 }
 

@@ -848,6 +848,10 @@ func _parse_source(section: RPP_ItemSourceSection) -> bool:
 			audio_source = RPP_AudioSource.new()
 			audio_source.file_type = RPP_AudioSource.Type.WAVE
 			source = audio_source
+		"MP3":
+			audio_source = RPP_AudioSource.new()
+			audio_source.file_type = RPP_AudioSource.Type.MP3
+			source = audio_source
 		"SECTION":
 			if not _parse_source_section():
 				return false
@@ -882,6 +886,10 @@ func _parse_source(section: RPP_ItemSourceSection) -> bool:
 				"FILE":
 					if not _expect_string(token): return false
 					audio_source.file_path = token.value
+					
+					# I saw MP3 have a number after the path. Not sure if it's specific to MP3.
+					if audio_source.file_type == RPP_AudioSource.Type.MP3:
+						if not _skip_numbers(1): return false
 				
 				"HASDATA":
 					if not _skip_numbers(2): return false
