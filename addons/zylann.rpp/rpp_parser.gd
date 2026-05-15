@@ -515,9 +515,16 @@ func _parse_track() -> bool:
 					if not _expect_number(token): return false
 					track.selected = token.value != 0.0
 				
-				"REC": if not _skip_numbers(8): return false
+				"REC":
+					# Sometimes 7 numbers, sometimes 8
+					if not _skip_to_end_of_line(): return false
+				
 				"VU": if not _skip_numbers(1): return false
-				"TRACKHEIGHT": if not _skip_numbers(7): return false
+				
+				"TRACKHEIGHT":
+					# Saw it with 3 or 7 numbers
+					if not _skip_to_end_of_line(): return false
+				
 				"INQ": if not _skip_numbers(8): return false
 				
 				"NCHAN":
@@ -563,7 +570,10 @@ func _parse_fxchain(_unused_is_master: bool) -> bool:
 				"FLOATPOS": if not _skip_numbers(4): return false
 				"FXID": if not _skip_guid(): return false
 				"WAK": if not _skip_numbers(2): return false
-				"WET": if not _skip_numbers(2): return false
+				
+				"WET":
+					# Sometimes 1 number, sometimes 2 numbers
+					if not _skip_to_end_of_line(): return false
 				
 				_:
 					_make_unknown_key_error(token.value)
@@ -699,7 +709,8 @@ func _parse_item() -> bool:
 					if not _expect_number(token): return false
 					item.fade_in_length = token.value
 					
-					if not _skip_numbers(5): return false
+					# Sometimes it's 6 numbers, sometimes it's 7
+					if not _skip_to_end_of_line(): return false
 				
 				"FADEOUT":
 					if not _expect_number(token): return false
@@ -708,7 +719,8 @@ func _parse_item() -> bool:
 					if not _expect_number(token): return false
 					item.fade_out_length = token.value
 					
-					if not _skip_numbers(5): return false
+					# Sometimes it's 6 numbers, sometimes it's 7
+					if not _skip_to_end_of_line(): return false
 				
 				"MUTE":
 					if not _expect_number(token): return false
@@ -862,7 +874,11 @@ func _parse_source(section: RPP_ItemSourceSection) -> bool:
 				
 				"IGNTEMPO": if not _skip_numbers(4): return false
 				"SRCCOLOR": if not _skip_numbers(1): return false
-				"VELLANE": if not _skip_numbers(5): return false
+				
+				"VELLANE":
+					# Sometimes 3 numbers, sometimes 5 numbers
+					if not _skip_to_end_of_line(): return false
+				
 				"CFGEDITVIEW": if not _skip_numbers(10): return false
 				"KEYSNAP": if not _skip_numbers(1): return false
 				"TRACKSEL": if not _skip_numbers(1): return false
