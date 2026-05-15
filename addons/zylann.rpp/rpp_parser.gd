@@ -805,8 +805,12 @@ func _parse_item() -> bool:
 					item.iid = token.value
 				
 				"NAME":
-					if not _expect_string_or_number(token): return false
+					#if not _expect_string_or_number(token): return false
+					# Maybe some day I'll have to consider that everything is always a string by default
+					_tokenizer.set_numbers_as_strings(true)
+					_expect_string(token)
 					item.name = token.value
+					_tokenizer.set_numbers_as_strings(false)
 				
 				"VOLPAN":
 					if not _expect_number(token): return false
