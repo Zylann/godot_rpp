@@ -67,6 +67,12 @@ func _parse_block(context: ParsingContext) -> bool:
 			var track := _get_last_track()
 			track.post_fx_volume_envelope = env
 		
+		"PANENV2":
+			var env := RPP_SimpleEnvelope.new()
+			if not _parse_envelope(env): return false
+			var track := _get_last_track()
+			track.post_fx_pan_envelope = env
+		
 		"NOTES": if not _parse_notes(context): return false
 		
 		_:
