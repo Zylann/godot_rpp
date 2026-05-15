@@ -637,17 +637,24 @@ func _parse_envelope(envelope: RPP_Envelope) -> bool:
 func _parse_parmenv() -> bool:
 	var token := RPP_Token.new()
 	
-	if not _expect_string(token): return false
-	var param_name : String = token.value
-	
-	if not _skip_numbers(3): return false
-	
-	if not _expect_string(token): return false
-	var param_name2 : String = token.value
-	
 	var envelope := RPP_ParamEnvelope.new()
-	envelope.parameter_name = param_name
-	envelope.parameter_name2 = param_name2
+	
+	# Seen the following sequences come up on different files:
+	# <PARMENV number number number number
+	# <PARMENV string number number number string
+	
+	if not _expect_string_or_number(token): return false
+	if token.type == RPP_Token.Type.STRING:
+		envelope.parameter_name = token.value
+		
+		if not _skip_numbers(3): return false
+		
+		if not _expect_string(token): return false
+		envelope.parameter_name2 = token.value
+	
+	elif token.type == RPP_Token.Type.NUMBER:
+		envelope.parameter_name = str(token.value)
+		if not _skip_numbers(3): return false
 	
 	if not _parse_envelope(envelope): return false
 	
