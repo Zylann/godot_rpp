@@ -582,6 +582,8 @@ func _parse_track() -> bool:
 				"PANLAWFLAGS": if not _skip_numbers(1): return false
 				"FIXEDLANES": if not _skip_numbers(5): return false
 				"FREEMODE": if not _skip_numbers(1): return false
+				"LAYOUTS": if not _skip_strings(2): return false
+				
 				
 				_:
 					_make_unknown_key_error(token.value)
@@ -835,6 +837,15 @@ func _parse_item() -> bool:
 				"GUID":
 					if not _expect_guid(token): return false
 					item.guid = token.value
+				
+				"IMGRESOURCEFLAGS": if not _skip_numbers(1): return false
+				
+				"NOTESWND": 
+					# Probably the position and size of the window to edit item notes
+					if not _skip_numbers(4): return false
+				
+				"TAKEFX_NCH": if not _skip_numbers(1): return false
+				"RECPASS": if not _skip_numbers(1): return false
 				
 				_:
 					_make_unknown_key_error(token.value)
