@@ -73,6 +73,11 @@ func _parse_block(context: ParsingContext) -> bool:
 			var track := _get_last_track()
 			track.post_fx_pan_envelope = env
 		
+		"POOLEDENV":
+			var envelope := RPP_PooledEnvelope.new()
+			_project.pooled_envelopes.append(envelope)
+			return _parse_envelope(envelope)
+		
 		"NOTES": if not _parse_notes(context): return false
 		
 		_:
@@ -634,6 +639,7 @@ func _parse_envelope(envelope: RPP_Envelope) -> bool:
 	
 	var tempo_envelope := envelope as RPP_TempoEnvelope
 	var param_envelope := envelope as RPP_ParamEnvelope
+	var pooled_envelope := envelope as RPP_PooledEnvelope
 	
 	while _tokenizer.read(token):
 		if token.type == RPP_Token.Type.CLOSE_BLOCK:
@@ -648,7 +654,37 @@ func _parse_envelope(envelope: RPP_Envelope) -> bool:
 				"DEFSHAPE": if not _skip_numbers(3): return false
 				"VOLTYPE": if not _skip_numbers(1): return false
 				
-				"PT":
+				"ID":
+					if pooled_envelope == null:
+						_make_error("Unexpected envelope type to have an ID")
+						return false
+					if not _expect_number(token): return false
+					pooled_envelope.id = token.value
+				
+				"NAME":
+					if pooled_envelope == null:
+						_make_error("Unexpected envelope type to have a NAME")
+						return false
+					if not _expect_string(token): return false
+					pooled_envelope.name = token.value
+				
+				"SRCLEN":
+					if pooled_envelope == null:
+						_make_error("Unexpected envelope type to have SRCLEN")
+						return false
+					if not _expect_number(token): return false
+					pooled_envelope.length = token.value
+				
+				"LFO": if not _skip_numbers(7): return false
+				
+				"POOLEDENVINST":
+					# TODO POOLEDENVINST: Not sure of what the numbers all represent
+					#      My guess so far:
+					#      <ID> <startpos> <length?> ...??...
+					if not _skip_numbers(16): return false
+				
+				# Not sure why POOLEDENV doesn't use `PT` like every other envelopes
+				"PT", "PPT":
 					if not _expect_number(token): return false
 					var position : float = token.value
 					

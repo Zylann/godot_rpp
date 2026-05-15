@@ -20,6 +20,8 @@ var tracks : Array[RPP_Track] = []
 var markers: Array[RPP_Marker] = []
 var regions: Array[RPP_Region] = []
 
+var pooled_envelopes: Array[RPP_PooledEnvelope] = []
+
 
 static func load_from_file(path: String) -> RPP_Project:
 	var f := FileAccess.open(path, FileAccess.READ)
