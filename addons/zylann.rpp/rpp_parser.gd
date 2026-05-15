@@ -565,7 +565,14 @@ func _parse_track() -> bool:
 				
 				"PERF": if not _skip_numbers(1): return false
 				"MIDIOUT": if not _skip_numbers(1): return false
-				"MAINSEND": if not _skip_numbers(2): return false
+				
+				"MAINSEND":
+					if not _expect_number(token): return false
+					track.parent_send = token.value != 0
+					
+					# I don't know what the second number means
+					if not _skip_numbers(1): return false
+				
 				"PANLAWFLAGS": if not _skip_numbers(1): return false
 				"FIXEDLANES": if not _skip_numbers(5): return false
 				"FREEMODE": if not _skip_numbers(1): return false

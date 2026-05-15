@@ -15,6 +15,7 @@ var channel_count := 0
 var items : Array[RPP_Item] = []
 var pre_fx_volume_envelope: RPP_SimpleEnvelope
 var post_fx_volume_envelope: RPP_SimpleEnvelope
+var parent_send := true
 
 
 func debug_print(base_indent: String = "", num: int = -1) -> void:
