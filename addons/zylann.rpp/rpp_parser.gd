@@ -1021,20 +1021,30 @@ func _parse_source(section: RPP_ItemSourceSection) -> bool:
 						if not _skip_numbers(1): return false
 				
 				"HASDATA":
-					if not _skip_numbers(2): return false
-					if not _skip_strings(1): return false
+					if midi_source == null:
+						_make_error("Expected MIDI item")
+						return false
+					
+					# has data? (bool)
+					if not _skip_numbers(1): return false
+					
+					if not _expect_number(token): return false
+					var nticks : int = token.value
+					
+					if not _expect_string(token): return false
+					var tunit : String = token.value
+					if tunit != "QN":
+						_make_error(str("Unknown tick unit ", tunit))
+						return false
+					midi_source.ticks_per_quarter_note = nticks
 				
 				# Can appear multiple times, not sure why
 				"CCINTERP": if not _skip_numbers(1): return false
 				
 				"POOLEDEVTS": if not _skip_guid(): return false
 				
-				"E":
-					if not _parse_midi_message(midi_source, false):
-						return false
-				"e":
-					if not _parse_midi_message(midi_source, true):
-						return false
+				"E": if not _parse_midi_message(midi_source, false): return false
+				"e": if not _parse_midi_message(midi_source, true): return false
 				
 				"CHASE_CC_TAKEOFFS": if not _skip_numbers(1): return false
 				
@@ -1059,7 +1069,7 @@ func _parse_source(section: RPP_ItemSourceSection) -> bool:
 					_make_unknown_key_error(token.value)
 					return false
 		else:
-			_make_error("Unhandled content")
+			_make_unexpected_token_error(token)
 	
 	return true
 
@@ -1145,6 +1155,11 @@ func _parse_midi_message(midi_source: RPP_MidiSource, _unused_selected: bool) ->
 		_make_error(str("Expected integer, got \"", data2_s, "\""))
 		return false
 	var data2 := data2_s.hex_to_int()
+	
+	# TODO There may be an additional field "prequantized_offset", havent seen it yet
+	# "Optional field only exists for midi events that have been quantized. 
+	# It is the difference between the note's position and where its position was 
+	# before it was quantized "
 	
 	midi_source.append_message(offset, message_type, channel, data1, data2)
 	

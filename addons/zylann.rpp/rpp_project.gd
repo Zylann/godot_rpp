@@ -9,9 +9,9 @@ var ripple: bool = false
 var auto_cross_fade: bool = false
 var loop: bool = false
 
-var tempo_speed: float = 0 # in BPM
-var tempo_signature_num: int = 0
-var tempo_signature_denom: int = 0
+var tempo_speed: float = 0 # in BPM (beats per minute)
+var tempo_signature_num: int = 4
+var tempo_signature_denom: int = 4
 var tempo_envelope: RPP_TempoEnvelope
 
 var master_track := RPP_MasterTrack.new()

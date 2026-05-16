@@ -2,17 +2,36 @@ class_name RPP_MidiSource extends RPP_ItemSource
 
 # https://wiki.cockos.com/wiki/index.php/StateChunkAndRppMidiFormat
 
+# https://wiki.cockos.com/wiki/index.php/MIDI_Specification
 enum MessageType {
 	NOTE_ON = 0x9,
 	NOTE_OFF = 0x8,
-	CONTROL_CHANGE = 0xb
+	POLYPHONIC_KEY_PRESSURE = 0xa,
+	CONTROL_CHANGE = 0xb,
+	PROGRAM_CHANGE = 0xc,
+	CHANNEL_AFTERTOUCH = 0xd,
+	PITCH_WHEEL = 0xe,
+	# The following nibble is not a channel
+	SYSTEM = 0xf
 }
 
 const MESSAGE_LENGTH = 8
 
+# According to the MIDI spec on Reaper wiki:
+# "A Tick is the smallest increment of a beat; based upon the resolution of the device or
+# application being used."
+# https://wiki.cockos.com/wiki/index.php/MIDI_Glossary#TICK
+# I'm confused by how I'm supposed to relate this to BPM and time in seconds.
+# So far I feel like here, a "quarter note" actually corresponds to a beat. Maybe I'm mistaken,
+# but so far this checks out with what I found in files:
+# I made a MIDI item in a project at 120 BPM 4/4 with 1 note per beat,
+# and found there was exactly one Note-On every 960 ticks.
+# Which corresponds to the 960 QN in HASDATA lines.
+var ticks_per_quarter_note : int
+
 # Series of:
-# - u32  start offset: u32
-# - u8   message type and channel: cccctttt
+# - u32  number of ticks between this message and the previous one in the current item
+# - u8   message type (t) and channel, when applicable (c): cccctttt
 # - u8   data1 (depends on message type)
 # - u8   data2 (depends on message type)
 # - u8   _unused
