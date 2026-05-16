@@ -736,7 +736,7 @@ func _parse_envelope(envelope: RPP_Envelope) -> bool:
 					
 					if tempo_envelope != null:
 						if not _expect_number(token): return false
-						var gradual : bool = token.value
+						var gradual : bool = (token.value == 0)
 						tempo_envelope.append_point(position, value, gradual)
 					
 					if param_envelope != null:
