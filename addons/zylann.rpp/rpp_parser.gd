@@ -926,7 +926,16 @@ func _parse_item() -> bool:
 								return false
 					_tokenizer.set_newlines(false)
 				
-				"PLAYRATE": if not _skip_numbers(6): return false
+				"PLAYRATE":
+					if not _expect_number(token): return false
+					item.playrate = token.value
+					
+					if not _expect_number(token): return false
+					item.preserve_pitch = token.value != 0
+					
+					# I don't know what the other numbers are
+					if not _skip_numbers(4): return false
+				
 				"CHANMODE": if not _skip_numbers(1): return false
 				
 				"GUID":

@@ -8,6 +8,10 @@ var length := 0.0
 
 # Time in seconds from which to start playback of the source
 var slip_offset := 0.0
+
+var playrate := 1.0
+var preserve_pitch := false
+
 var fade_in_length := 0.0
 var fade_out_length := 0.0
 
