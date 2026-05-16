@@ -909,7 +909,11 @@ func _parse_item() -> bool:
 					if not _skip_numbers(2): return false
 				
 				"SOFFS":
-					# Sometimes it's one number, sometimes it's two. I don't know why.
+					if not _expect_number(token): return false
+					item.slip_offset = token.value
+					
+					# Sometimes there is a second number, which seems to be the double of the first.
+					# But is it? Why?
 					_tokenizer.set_newlines(true)
 					while _tokenizer.expect(token):
 						match token.type:
