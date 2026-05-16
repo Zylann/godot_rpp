@@ -16,6 +16,7 @@ enum MessageType {
 }
 
 const MESSAGE_LENGTH = 8
+const MAX_NOTE = 128
 
 # According to the MIDI spec on Reaper wiki:
 # "A Tick is the smallest increment of a beat; based upon the resolution of the device or
