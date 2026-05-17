@@ -18,6 +18,8 @@ func _init(source: String) -> void:
 
 
 func parse(project: RPP_Project) -> bool:
+	var time_before := Time.get_ticks_usec()
+	
 	_project = project
 	
 	var token := RPP_Token.new()
@@ -26,6 +28,24 @@ func parse(project: RPP_Project) -> bool:
 	
 	if not _parse_block(ParsingContext.PROJECT):
 		return false
+	
+	var time_spent_parsing := Time.get_ticks_usec() - time_before
+	time_before = Time.get_ticks_usec()
+	
+	var ddd_beat := project.time_to_beat(1.411 + 1.0)
+	
+	# Post-process
+	for track in project.tracks:
+		for item in track.items:
+			if item.source != null:
+				var midi := item.source as RPP_MidiSource
+				if midi != null:
+					midi.update_cache(item, project)
+	
+	var time_spent_postprocess := Time.get_ticks_usec() - time_before
+	
+	print("Time spent parsing: ", time_spent_parsing, "us")
+	print("Time spent post-processing: ", time_spent_postprocess, "us")
 	
 	return true
 

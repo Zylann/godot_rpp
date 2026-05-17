@@ -116,7 +116,7 @@ func _draw_track(track: RPP_Track, track_rect: Rect2, time_begin: float, time_en
 
 
 func _draw_midi_notes(
-	item: RPP_Item, 
+	_unused_item: RPP_Item, 
 	midi: RPP_MidiSource, 
 	item_rect: Rect2, 
 	time_to_px: float
@@ -124,52 +124,40 @@ func _draw_midi_notes(
 	var note_height := maxf(item_rect.size.y / 16.0, 1.0)
 	var note_color := Color(0,0,0,0.75)
 	
-	var mcount := midi.get_message_count()
-	# note => [start ticks]
-	var notes : Dictionary[int, PackedInt32Array] = {}
-	var ticks := 0
-	var tick_to_beat := 1.0 / midi.ticks_per_quarter_note
+	# [channel][note][instance]
+	var channels : Array[Array] = []
+	channels.resize(RPP_MidiSource.MAX_CHANNELS)
+	for chan_index in channels.size():
+		var notes : Array[PackedFloat64Array] = []
+		notes.resize(RPP_MidiSource.MAX_NOTE)
+		for i in notes.size():
+			notes[i] = PackedFloat64Array()
+		channels[chan_index] = notes
 	
-	# TODO Proper support for slip offset and looping
-	
-	for mi in mcount:
-		var mtype := midi.get_message_type(mi)
-		
+	for mi in midi.cached_messages_type.size():
+		var mtype := midi.cached_messages_type[mi]
+		var mchan := midi.cached_messages_channel[mi]
+		var mtime := midi.cached_messages_time[mi]
 		match mtype:
 			RPP_MidiSource.MessageType.NOTE_ON:
-				var mticks := midi.get_message_start_offset(mi)
-				ticks += mticks
-				var nn := midi.get_message_data1(mi)
-				if notes.has(nn):
-					var st : PackedInt32Array = notes[nn]
-					st.append(ticks)
-				else:
-					notes[nn] = PackedInt32Array([ticks])
-			
+				var nn := midi.cached_messages_data1[mi]
+				var notes : Array[PackedFloat64Array] = channels[mchan]
+				var ons := notes[nn]
+				ons.append(mtime)
 			RPP_MidiSource.MessageType.NOTE_OFF:
-				var mticks := midi.get_message_start_offset(mi)
-				ticks += mticks
-				var nn := midi.get_message_data1(mi)
-				assert(notes.has(nn))
-				var st : PackedInt32Array = notes[nn]
-				assert(st.size() > 0)
-				var last_index = st.size() - 1
-				var begin_ticks := st[last_index]
-				var end_ticks := ticks
-				st.resize(last_index)
-				var begin_beats := begin_ticks * tick_to_beat
-				var end_beats := end_ticks * tick_to_beat
-				var t0 := item.position - item.slip_offset
-				# Tempo changes make this really tricky
-				var begin_rtime := _project.get_rtime_from_beat(t0, begin_beats)
-				var end_rtime := _project.get_rtime_from_beat(t0, end_beats)
+				var nn := midi.cached_messages_data1[mi]
+				var notes : Array[PackedFloat64Array] = channels[mchan]
+				var ons := notes[nn]
+				assert(ons.size() > 0)
+				var li := ons.size() - 1
+				var otime := ons[li]
+				ons.resize(li)
+				var x1 := time_to_px * otime
+				var x2 := time_to_px * mtime
 				var nr := nn / float(RPP_MidiSource.MAX_NOTE)
 				var y := note_height * 0.5 + (item_rect.size.y - note_height) * (1.0 - nr) \
 					+ item_rect.position.y
-				var x1 := begin_rtime * time_to_px
-				var x2 := end_rtime * time_to_px
 				var note_rect := Rect2(item_rect.position.x + x1, y, x2 - x1, note_height)
 				draw_rect(note_rect, note_color)
-			
 			_:
 				pass
