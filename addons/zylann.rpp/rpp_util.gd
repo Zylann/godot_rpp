@@ -13,9 +13,7 @@ static func get_beats_between_tempo_markers(
 	var bps1 := bpm1 / 60.0
 	
 	if not gradual:
-		if bps1 <= 0.0:
-			return 0.0
-		return (t2 - t1) / bps1
+		return (t2 - t1) * bps1
 	
 	if t1 >= t2:
 		return 0.0
