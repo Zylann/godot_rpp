@@ -70,6 +70,8 @@ func _draw_track(track: RPP_Track, track_rect: Rect2, time_begin: float, time_en
 		item_base_color = track.color
 	var item_bg_color := item_base_color#.lightened(0.25)
 	var item_border_color := item_base_color.darkened(0.25)
+	var item_muted_bg_color := item_bg_color.darkened(0.5)
+	var item_muted_border_color := item_border_color.darkened(0.5)
 	
 	var fade_color := Color(0.5, 0.0, 0.0)
 	
@@ -86,7 +88,7 @@ func _draw_track(track: RPP_Track, track_rect: Rect2, time_begin: float, time_en
 			time_to_px * item.length,
 			track_rect.size.y
 		)
-		draw_rect(item_rect, item_bg_color)
+		draw_rect(item_rect, item_muted_bg_color if item.muted else item_bg_color)
 		
 		if item.source != null:
 			var midi := item.source as RPP_MidiSource
@@ -112,7 +114,7 @@ func _draw_track(track: RPP_Track, track_rect: Rect2, time_begin: float, time_en
 					fade_color
 				)
 		
-		draw_rect(item_rect, item_border_color, false)
+		draw_rect(item_rect, item_muted_border_color if item.muted else item_border_color, false)
 
 
 func _draw_midi_notes(
