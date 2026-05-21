@@ -117,6 +117,20 @@ func _draw_track(track: RPP_Track, track_rect: Rect2, time_begin: float, time_en
 		draw_rect(item_rect, item_muted_border_color if item.muted else item_border_color, false)
 
 
+static func get_notes_range(midi: RPP_MidiSource) -> Vector2i:
+	var min_note := RPP_MidiSource.MAX_NOTE
+	var max_note := 0
+	
+	for i in midi.get_message_count():
+		var mtype := midi.get_message_type(i)
+		if mtype == RPP_MidiSource.MessageType.NOTE_ON:
+			var note := midi.get_message_data1(i)
+			min_note = mini(min_note, note)
+			max_note = maxi(max_note, note)
+	
+	return Vector2i(min_note, max_note)
+
+
 func _draw_midi_notes(
 	_unused_item: RPP_Item, 
 	midi: RPP_MidiSource, 
@@ -135,6 +149,11 @@ func _draw_midi_notes(
 		for i in notes.size():
 			notes[i] = PackedFloat64Array()
 		channels[chan_index] = notes
+	
+	var notes_range := get_notes_range(midi)
+	# Tweak range of displayed notes to better occupy visual space
+	var viz_min_note := maxi(notes_range.x - 4, 0)
+	var viz_max_note := mini(notes_range.y + 4, RPP_MidiSource.MAX_NOTE)
 	
 	for mi in midi.cached_messages_type.size():
 		var mtype := midi.cached_messages_type[mi]
@@ -156,7 +175,7 @@ func _draw_midi_notes(
 				ons.resize(li)
 				var x1 := time_to_px * otime
 				var x2 := time_to_px * mtime
-				var nr := nn / float(RPP_MidiSource.MAX_NOTE)
+				var nr := (nn - viz_min_note) / float(viz_max_note - viz_min_note)
 				var y := note_height * 0.5 + (item_rect.size.y - note_height) * (1.0 - nr) \
 					+ item_rect.position.y
 				var note_rect := Rect2(item_rect.position.x + x1, y, x2 - x1, note_height)
