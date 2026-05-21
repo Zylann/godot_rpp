@@ -170,7 +170,7 @@ func get_rtime_from_beat(p_t0: float, p_beat: float) -> float:
 		else:
 			# Found the tempo marker range in which our beat is
 			var rbeats := p_beat - dbeats
-			dt += RPP_Util.get_beat_time_between_tempo_markers(t1, bpm1, t2, bpm2, true, rbeats)
+			dt += RPP_Util.get_beat_time_between_tempo_markers(t1, bpm1, t2, bpm2, gradual, rbeats)
 			break
 	
 	return dt
