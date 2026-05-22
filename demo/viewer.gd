@@ -36,6 +36,7 @@ func _draw() -> void:
 		return
 	
 	var marker_default_color := Color(0.6, 0.0, 0.0)
+	var tempo_marker_color := Color(0,0,0, 0.5)
 	
 	for track_index in _project.tracks.size():
 		var track := _project.tracks[track_index]
@@ -57,6 +58,11 @@ func _draw() -> void:
 		if marker.use_custom_color:
 			color = marker.color
 		draw_line(Vector2(x, 0), Vector2(x, size.y), color)
+	
+	for pi in _project.tempo_envelope.get_point_count():
+		var t := _project.tempo_envelope.get_point_position(pi)
+		var x := time_to_px * t
+		draw_line(Vector2(x, 0), Vector2(x, size.y), tempo_marker_color)
 
 
 func _draw_track(track: RPP_Track, track_rect: Rect2, time_begin: float, time_end: float) -> void:
