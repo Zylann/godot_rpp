@@ -6,12 +6,10 @@ var _project : RPP_Project
 
 func _ready() -> void:
 	# Testing
-	var path := "D:/Projets/Musique/OSphere/City/city.rpp"
-	#var path := "D:/Projets/Musique/Robocraft/rc1.rpp"
-	#var path := "D:/Projets/Audio/Enfer Liquide/Episodes/Episode 8/enfer_liquide_ep8.RPP"
-	#var path := "./test_projects/test1.rpp"
+	var path := "./demo/test1.rpp"
 	var project := RPP_Project.load_from_file(path)
 	set_project(project)
+	#scale = Vector2(3,3)
 
 
 func set_project(project: RPP_Project) -> void:
@@ -32,7 +30,7 @@ func _draw() -> void:
 	var total_len := _project.get_total_length()
 	
 	var time_begin := 0.0
-	var time_end := total_len * 0.3
+	var time_end := total_len * 1.0
 	
 	if time_begin >= time_end:
 		return
